@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, BookOpen, Calculator, TrendingUp, Users, Shield, CheckCircle, Star, ArrowRight, FileText, Award, Clock, DollarSign, Download, Twitter, Monitor } from 'lucide-react'
+import { ChevronDown, ChevronRight, BookOpen, Calculator, TrendingUp, Users, Shield, CheckCircle, Star, ArrowRight, FileText, Award, Clock, DollarSign, Download, Twitter, Monitor, Menu, X } from 'lucide-react'
 import LoanOptimizer from './components/LoanOptimizer'
 
 function App() {
   const [showDemo, setShowDemo] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   if (showDemo) {
     return <LoanOptimizer />
@@ -11,6 +12,59 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-coral-50">
+      {/* Global Navigation */}
+      <nav className="bg-navy-900 text-white relative z-50">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center py-4">
+            {/* Logo */}
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-teal-500 rounded-lg flex items-center justify-center">
+                <FileText className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <div className="text-xl font-display font-bold text-white">Clinicians Wealth</div>
+                <div className="text-xs text-teal-400">.dot phrases for your wealth</div>
+              </div>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              <a href="#how-it-works" className="text-navy-200 hover:text-white transition-colors">How It Works</a>
+              <a href="#resources" className="text-navy-200 hover:text-white transition-colors">Resources</a>
+              <button
+                onClick={() => setShowDemo(true)}
+                className="bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+              >
+                Get Started
+              </button>
+            </div>
+
+            {/* Mobile menu button */}
+            <button
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-navy-800 py-4">
+              <div className="flex flex-col space-y-4">
+                <a href="#how-it-works" className="text-navy-200 hover:text-white transition-colors">How It Works</a>
+                <a href="#resources" className="text-navy-200 hover:text-white transition-colors">Resources</a>
+                <button
+                  onClick={() => setShowDemo(true)}
+                  className="bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-left"
+                >
+                  Get Started
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
@@ -27,7 +81,7 @@ function App() {
             </div>
           </div>
           <p className="text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
-            The comprehensive loan analysis tool built specifically for physicians.
+            The comprehensive loan analysis tool built specifically for <strong>clinicians under 40</strong>.
           </p>
           <p className="text-lg text-gray-500 mb-8">
             We analyze <strong>all 20+ repayment options</strong> - not just the 4 the government shows you.
@@ -215,15 +269,214 @@ function App() {
                       <ArrowRight className="w-5 h-5" />
                     </button>
                     
-                    <div className="text-center">
-                      <p className="text-navy-300 text-sm mb-2">Plus: Ongoing Rate Monitoring</p>
-                      <div className="inline-flex items-center space-x-2 bg-navy-700/50 text-navy-200 px-4 py-2 rounded-xl text-sm">
-                        <Monitor className="w-4 h-4" />
-                        <span>$5/month after 6 months</span>
+                    <button
+                      onClick={() => window.open('/premium-report-sample.pdf', '_blank')}
+                      className="bg-white/20 hover:bg-white/30 text-white font-semibold py-4 px-6 rounded-xl text-lg transition-all border border-white/30 hover:border-white/50 inline-flex items-center space-x-2"
+                    >
+                      <Download className="w-5 h-5" />
+                      <span>View Sample Report</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* How It Works Section */}
+      <div id="how-it-works" className="bg-gradient-to-br from-teal-50 to-coral-50 py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-display font-bold text-navy-800 mb-6">
+                How Our Analysis Works
+              </h2>
+              <p className="text-xl text-gray-600 mb-4">
+                Simple process, comprehensive results - designed for busy clinicians under 40
+              </p>
+              <p className="text-lg text-gray-500">
+                From upload to implementation in under 10 minutes
+              </p>
+            </div>
+            
+            {/* Process Steps */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+              <div className="relative text-center">
+                <div className="w-20 h-20 bg-teal-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <FileText className="w-10 h-10 text-teal-600" />
+                </div>
+                <h3 className="text-xl font-display font-bold text-navy-800 mb-3">1. Upload or Enter</h3>
+                <p className="text-gray-600 mb-4">Share your loan info via document upload or quick manual entry</p>
+                <div className="text-sm text-teal-600 font-semibold">📄 30 seconds</div>
+                
+                {/* Arrow */}
+                <div className="hidden md:block absolute top-10 -right-4 text-gray-300">
+                  <ArrowRight className="w-8 h-8" />
+                </div>
+              </div>
+              
+              <div className="relative text-center">
+                <div className="w-20 h-20 bg-coral-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Calculator className="w-10 h-10 text-coral-600" />
+                </div>
+                <h3 className="text-xl font-display font-bold text-navy-800 mb-3">2. AI Analysis</h3>
+                <p className="text-gray-600 mb-4">We analyze all 20+ federal plans, refinancing options, and state programs</p>
+                <div className="text-sm text-coral-600 font-semibold">🧠 2 minutes</div>
+                
+                {/* Arrow */}
+                <div className="hidden md:block absolute top-10 -right-4 text-gray-300">
+                  <ArrowRight className="w-8 h-8" />
+                </div>
+              </div>
+              
+              <div className="relative text-center">
+                <div className="w-20 h-20 bg-sage-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <TrendingUp className="w-10 h-10 text-sage-600" />
+                </div>
+                <h3 className="text-xl font-display font-bold text-navy-800 mb-3">3. Personalized Strategy</h3>
+                <p className="text-gray-600 mb-4">Get your optimal path based on specialty, career goals, and timeline</p>
+                <div className="text-sm text-sage-600 font-semibold">🎯 1 minute</div>
+                
+                {/* Arrow */}
+                <div className="hidden md:block absolute top-10 -right-4 text-gray-300">
+                  <ArrowRight className="w-8 h-8" />
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <div className="w-20 h-20 bg-gold-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <Download className="w-10 h-10 text-gold-600" />
+                </div>
+                <h3 className="text-xl font-display font-bold text-navy-800 mb-3">4. Implementation</h3>
+                <p className="text-gray-600 mb-4">Detailed report with exact steps, forms, and contact information</p>
+                <div className="text-sm text-gold-600 font-semibold">📋 Lifetime access</div>
+              </div>
+            </div>
+
+            {/* What Makes Us Different */}
+            <div className="bg-white rounded-3xl p-8 md:p-12 shadow-xl">
+              <div className="text-center mb-10">
+                <h3 className="text-3xl font-display font-bold text-navy-800 mb-4">
+                  What Makes Our Analysis Different
+                </h3>
+                <p className="text-xl text-gray-600">
+                  We go beyond basic calculators to give you the complete picture
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {/* Left: What Others Miss */}
+                <div>
+                  <h4 className="text-2xl font-display font-bold text-navy-800 mb-6">
+                    What Others Miss:
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mt-1">
+                        <span className="text-red-600 text-sm">✗</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">Physician-specific rates</p>
+                        <p className="text-sm text-gray-600">Most tools use generic rates, not medical professional discounts</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mt-1">
+                        <span className="text-red-600 text-sm">✗</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">State forgiveness programs</p>
+                        <p className="text-sm text-gray-600">Up to $50K available through state programs</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mt-1">
+                        <span className="text-red-600 text-sm">✗</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">Career timeline optimization</p>
+                        <p className="text-sm text-gray-600">When to switch strategies as income changes</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center mt-1">
+                        <span className="text-red-600 text-sm">✗</span>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">Implementation support</p>
+                        <p className="text-sm text-gray-600">Exact forms, deadlines, and contact information</p>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Right: What We Include */}
+                <div>
+                  <h4 className="text-2xl font-display font-bold text-navy-800 mb-6">
+                    What We Include:
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-sage-100 rounded-full flex items-center justify-center mt-1">
+                        <CheckCircle className="w-4 h-4 text-sage-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">All 20+ repayment strategies</p>
+                        <p className="text-sm text-gray-600">Federal plans, refinancing, hybrid approaches</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-sage-100 rounded-full flex items-center justify-center mt-1">
+                        <CheckCircle className="w-4 h-4 text-sage-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">Physician-optimized rates</p>
+                        <p className="text-sm text-gray-600">Access to medical professional discounts</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-sage-100 rounded-full flex items-center justify-center mt-1">
+                        <CheckCircle className="w-4 h-4 text-sage-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">Complete program database</p>
+                        <p className="text-sm text-gray-600">State, employer, and specialty-specific programs</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-3">
+                      <div className="w-6 h-6 bg-sage-100 rounded-full flex items-center justify-center mt-1">
+                        <CheckCircle className="w-4 h-4 text-sage-600" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">Step-by-step roadmap</p>
+                        <p className="text-sm text-gray-600">Exact implementation plan with deadlines</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA in How It Works */}
+              <div className="text-center mt-12">
+                <button
+                  onClick={() => setShowDemo(true)}
+                  className="bg-coral-500 hover:bg-coral-600 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl inline-flex items-center space-x-2"
+                >
+                  <span>See How It Works For You</span>
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+                <p className="text-sm text-gray-500 mt-3">
+                  Takes 5 minutes • No commitment required
+                </p>
               </div>
             </div>
           </div>
@@ -476,7 +729,9 @@ function App() {
                     rel="noopener noreferrer"
                     className="text-navy-400 hover:text-white transition-colors"
                   >
-                    <Twitter className="w-5 h-5" />
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
                   </a>
                 </div>
               </div>
@@ -506,7 +761,7 @@ function App() {
 
             <div className="border-t border-navy-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
               <div className="text-navy-400 text-sm mb-4 md:mb-0">
-                © 2024 Clinicians Wealth. Built by physicians, for physicians.
+                © 2025 Clinicians Wealth. Simplifying complex financial decisions.
               </div>
               <div className="flex space-x-6 text-navy-400 text-sm">
                 <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
