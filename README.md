@@ -170,4 +170,4 @@ clinician-loan-optimizer/
    curl http://localhost:4545/api/mcp/test
    ```
 
-**See [MCP_SETUP_GUIDE.md](MCP_SETUP_GUIDE.md) for detailed configuration instructions.**
+**See [MCP_SETUP_GUIDE.md](MCP_SETUP_GUIDE.md) for detailed configuration instructions.**# CliniciansWealth
