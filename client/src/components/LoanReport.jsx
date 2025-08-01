@@ -1,5 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import pdfExportService from '../utils/pdfExport';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Line, Bar } from 'react-chartjs-2';
 import { 
   TrendingUp, 
   Calendar, 
@@ -18,10 +32,24 @@ import {
   Share2
 } from 'lucide-react';
 
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
+
 const LoanReport = ({ reportData, onBack }) => {
   const [selectedStrategy, setSelectedStrategy] = useState('recommended');
   const [activeSection, setActiveSection] = useState('overview');
   const [expandedSections, setExpandedSections] = useState(new Set(['timeline']));
+  const [isExporting, setIsExporting] = useState(false);
+  const reportRef = useRef(null);
   const chartRef = useRef(null);
 
   // Mock data - in real app this would come from props/API
@@ -169,8 +197,41 @@ const LoanReport = ({ reportData, onBack }) => {
     }).format(amount);
   };
 
-  const exportToPDF = () => {
-    window.print();
+  const exportToPDF = async () => {
+    if (!reportRef.current || isExporting) return;
+    
+    setIsExporting(true);
+    
+    const userProfile = {
+      name: 'Dr. Sarah Chen',
+      specialty: 'Internal Medicine',
+      careerStage: 'Resident'
+    };
+
+    const filename = `loan-strategy-${currentStrategy.name.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}.pdf`;
+    
+    try {
+      const result = await pdfExportService.exportReportToPDF(
+        reportRef.current,
+        filename,
+        userProfile
+      );
+      
+      if (result.success) {
+        // Show success message (optional)
+        console.log('PDF exported successfully');
+      } else {
+        console.error('PDF export failed:', result.error);
+        // Fallback to print
+        pdfExportService.exportUsingPrint();
+      }
+    } catch (error) {
+      console.error('PDF export error:', error);
+      // Fallback to print
+      pdfExportService.exportUsingPrint();
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const shareReport = () => {
@@ -180,6 +241,196 @@ const LoanReport = ({ reportData, onBack }) => {
         text: `I could save ${formatCurrency(strategies.recommended.totalPaid - currentStrategy.totalPaid)} on my student loans!`,
         url: window.location.href
       });
+    }
+  };
+
+  // Chart data preparation
+  const paymentTimelineData = {
+    labels: currentStrategy.paymentSchedule.map(item => `Year ${item.year}`),
+    datasets: [
+      {
+        label: 'Monthly Payment',
+        data: currentStrategy.paymentSchedule.map(item => item.payment),
+        borderColor: '#0f766e',
+        backgroundColor: 'rgba(15, 118, 110, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4,
+        yAxisID: 'y'
+      },
+      {
+        label: 'Annual Salary',
+        data: currentStrategy.paymentSchedule.map(item => item.salary / 1000),
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+        borderWidth: 3,
+        fill: false,
+        tension: 0.4,
+        yAxisID: 'y1'
+      }
+    ]
+  };
+
+  const loanBalanceData = {
+    labels: currentStrategy.paymentSchedule.map(item => `Year ${item.year}`),
+    datasets: [
+      {
+        label: 'Remaining Balance',
+        data: currentStrategy.paymentSchedule.map(item => item.balance),
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        borderWidth: 3,
+        fill: true,
+        tension: 0.4
+      }
+    ]
+  };
+
+  const strategyComparisonData = {
+    labels: ['SAVE + PSLF', 'Private Refinancing', 'Standard Federal'],
+    datasets: [
+      {
+        label: 'Total Amount Paid',
+        data: [
+          strategies.recommended.totalPaid,
+          strategies.refinancing.totalPaid,
+          strategies.standard.totalPaid
+        ],
+        backgroundColor: [
+          'rgba(15, 118, 110, 0.8)',
+          'rgba(245, 158, 11, 0.8)',
+          'rgba(239, 68, 68, 0.8)'
+        ],
+        borderColor: [
+          '#0f766e',
+          '#f59e0b',
+          '#ef4444'
+        ],
+        borderWidth: 2
+      }
+    ]
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: {
+          usePointStyle: true,
+          padding: 20
+        }
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: function(context) {
+            if (context.dataset.label === 'Annual Salary') {
+              return `${context.dataset.label}: $${(context.parsed.y * 1000).toLocaleString()}`;
+            }
+            return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        title: {
+          display: true,
+          text: 'Monthly Payment ($)'
+        },
+        ticks: {
+          callback: function(value) {
+            return '$' + value.toLocaleString();
+          }
+        }
+      },
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Annual Salary ($000)'
+        },
+        grid: {
+          drawOnChartArea: false,
+        },
+        ticks: {
+          callback: function(value) {
+            return '$' + value + 'K';
+          }
+        }
+      }
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false,
+    }
+  };
+
+  const balanceChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top'
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        title: {
+          display: true,
+          text: 'Loan Balance ($)'
+        },
+        ticks: {
+          callback: function(value) {
+            return '$' + (value / 1000) + 'K';
+          }
+        }
+      }
+    }
+  };
+
+  const comparisonChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `Total Paid: $${context.parsed.y.toLocaleString()}`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        title: {
+          display: true,
+          text: 'Total Amount Paid ($)'
+        },
+        ticks: {
+          callback: function(value) {
+            return '$' + (value / 1000) + 'K';
+          }
+        }
+      }
     }
   };
 
@@ -213,17 +464,31 @@ const LoanReport = ({ reportData, onBack }) => {
               </button>
               <button
                 onClick={exportToPDF}
-                className="flex items-center space-x-2 px-4 py-2 bg-coral-500 text-white rounded-lg hover:bg-coral-600 transition-colors"
+                disabled={isExporting}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                  isExporting 
+                    ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                    : 'bg-coral-500 text-white hover:bg-coral-600'
+                }`}
               >
-                <Download className="w-4 h-4" />
-                <span>Export PDF</span>
+                {isExporting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    <span>Export PDF</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8" ref={reportRef}>
         {/* Executive Summary */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -353,7 +618,7 @@ const LoanReport = ({ reportData, onBack }) => {
               </div>
             </motion.div>
 
-            {/* Payment Chart */}
+            {/* Payment Timeline Chart */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -363,12 +628,38 @@ const LoanReport = ({ reportData, onBack }) => {
               <h3 className="text-xl font-display font-bold text-navy-800 mb-4">
                 Payment Timeline & Salary Growth
               </h3>
-              <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <TrendingUp className="w-12 h-12 mx-auto mb-2" />
-                  <p>Interactive chart showing payment progression</p>
-                  <p className="text-sm">(Chart.js integration would go here)</p>
-                </div>
+              <div className="h-80">
+                <Line data={paymentTimelineData} options={chartOptions} />
+              </div>
+            </motion.div>
+
+            {/* Loan Balance Progression */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 }}
+              className="bg-white rounded-xl p-6 shadow-lg"
+            >
+              <h3 className="text-xl font-display font-bold text-navy-800 mb-4">
+                Loan Balance Over Time
+              </h3>
+              <div className="h-64">
+                <Line data={loanBalanceData} options={balanceChartOptions} />
+              </div>
+            </motion.div>
+
+            {/* Strategy Comparison Chart */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white rounded-xl p-6 shadow-lg"
+            >
+              <h3 className="text-xl font-display font-bold text-navy-800 mb-4">
+                Total Cost Comparison
+              </h3>
+              <div className="h-64">
+                <Bar data={strategyComparisonData} options={comparisonChartOptions} />
               </div>
             </motion.div>
 

@@ -138,7 +138,7 @@ const CheckoutForm = ({ formData, onPaymentComplete, onPaymentError, isProcessin
   );
 };
 
-const PaymentStep = ({ prevStep, formData }) => {
+const PaymentStep = ({ prevStep, formData, onShowReport }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
   const [paymentError, setPaymentError] = useState('');
@@ -281,9 +281,18 @@ const PaymentStep = ({ prevStep, formData }) => {
             </div>
           </div>
 
-          <div className="mt-8 text-sm text-gray-500">
-            <p>📧 Report sent to: {formData.email}</p>
-            <p className="mt-2">Questions? Reply to any of our emails for support.</p>
+          <div className="mt-8 space-y-4">
+            <button
+              onClick={() => onShowReport && onShowReport(formData)}
+              className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              📊 View Interactive Report
+            </button>
+            
+            <div className="text-sm text-gray-500 text-center">
+              <p>📧 Report sent to: {formData.email}</p>
+              <p className="mt-2">Questions? Reply to any of our emails for support.</p>
+            </div>
           </div>
         </motion.div>
       </div>

@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, BookOpen, Calculator, TrendingUp, Users, Shield, CheckCircle, Star, ArrowRight, FileText, Award, Clock, DollarSign, Download, Twitter, Monitor, Menu, X } from 'lucide-react'
 import LoanOptimizer from './components/LoanOptimizer'
 import Resources from './components/Resources'
+import Dashboard from './components/Dashboard'
 
 function App() {
   const [showDemo, setShowDemo] = useState(false)
   const [showResources, setShowResources] = useState(false)
+  const [showDashboard, setShowDashboard] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   if (showDemo) {
@@ -14,6 +16,10 @@ function App() {
 
   if (showResources) {
     return <Resources onBackToHome={() => setShowResources(false)} />
+  }
+
+  if (showDashboard) {
+    return <Dashboard onBack={() => setShowDashboard(false)} user={{ firstName: 'Sarah' }} />
   }
 
   return (
@@ -37,6 +43,7 @@ function App() {
             <div className="hidden md:flex items-center space-x-8">
               <a href="#how-it-works" className="text-navy-200 hover:text-white transition-colors">How It Works</a>
               <button onClick={() => setShowResources(true)} className="text-navy-200 hover:text-white transition-colors">Resources</button>
+              <button onClick={() => setShowDashboard(true)} className="text-navy-200 hover:text-white transition-colors">Dashboard</button>
               <button
                 onClick={() => setShowDemo(true)}
                 className="bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
@@ -60,6 +67,7 @@ function App() {
               <div className="flex flex-col space-y-4">
                 <a href="#how-it-works" className="text-navy-200 hover:text-white transition-colors">How It Works</a>
                 <button onClick={() => setShowResources(true)} className="text-navy-200 hover:text-white transition-colors text-left">Resources</button>
+                <button onClick={() => setShowDashboard(true)} className="text-navy-200 hover:text-white transition-colors text-left">Dashboard</button>
                 <button
                   onClick={() => setShowDemo(true)}
                   className="bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-left"

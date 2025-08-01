@@ -10,6 +10,7 @@ import LoanSnapshotStep from './steps/LoanSnapshotStep';
 import CareerGoalsStep from './steps/CareerGoalsStep';
 import ResultsPreviewStep from './steps/ResultsPreviewStep';
 import PaymentStep from './steps/PaymentStep';
+import LoanReport from './LoanReport';
 
 // Progress Component
 const ProgressBar = ({ currentStep, totalSteps }) => {
@@ -30,6 +31,8 @@ const ProgressBar = ({ currentStep, totalSteps }) => {
 const LoanOptimizer = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({});
+  const [showReport, setShowReport] = useState(false);
+  const [reportData, setReportData] = useState(null);
   const methods = useForm({
     mode: 'onChange',
     defaultValues: {
@@ -70,6 +73,16 @@ const LoanOptimizer = () => {
     }
   };
 
+  const handleShowReport = (data) => {
+    setReportData(data);
+    setShowReport(true);
+  };
+
+  const handleBackFromReport = () => {
+    setShowReport(false);
+    setReportData(null);
+  };
+
   const updateFormData = (data) => {
     setFormData(prev => ({ ...prev, ...data }));
   };
@@ -97,11 +110,15 @@ const LoanOptimizer = () => {
       case 6:
         return <ResultsPreviewStep {...stepProps} />;
       case 7:
-        return <PaymentStep {...stepProps} />;
+        return <PaymentStep {...stepProps} onShowReport={handleShowReport} />;
       default:
         return <QuickStartStep {...stepProps} />;
     }
   };
+
+  if (showReport) {
+    return <LoanReport reportData={reportData} onBack={handleBackFromReport} />;
+  }
 
   return (
     <FormProvider {...methods}>
