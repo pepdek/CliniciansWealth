@@ -17,30 +17,34 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
         if (formData.loanMethod === 'upload' && formData.loanDocuments?.length > 0) {
           console.log('Analyzing uploaded documents...');
           
-          const analysisResponse = await fetch('/api/mcp/analyze/documents', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              files: formData.loanDocuments.map(doc => ({
-                name: doc.name,
-                type: doc.type,
-                size: doc.size
-              })),
-              userContext: {
-                specialty: formData.specialty,
-                careerStage: formData.careerStage,
-                graduationYear: formData.graduationYear
-              }
-            })
-          });
-          
-          if (analysisResponse.ok) {
-            const analysis = await analysisResponse.json();
-            loanData = analysis.data;
-          } else {
-            console.error('Document analysis failed, using manual data');
+          try {
+            const analysisResponse = await fetch('/api/mcp/analyze/documents', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                files: formData.loanDocuments.map(doc => ({
+                  name: doc.name,
+                  type: doc.type,
+                  size: doc.size
+                })),
+                userContext: {
+                  specialty: formData.specialty,
+                  careerStage: formData.careerStage,
+                  graduationYear: formData.graduationYear
+                }
+              })
+            });
+            
+            if (analysisResponse.ok) {
+              const analysis = await analysisResponse.json();
+              loanData = analysis.data;
+            } else {
+              console.error('Document analysis failed, using manual data');
+            }
+          } catch (fetchError) {
+            console.error('Document analysis API call failed:', fetchError);
           }
         }
         
@@ -75,39 +79,49 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
           state: formData.state
         };
         
-        const calculationResponse = await fetch('/api/mcp/calculate/optimization', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            loanData,
-            userProfile
-          })
-        });
-        
-        if (calculationResponse.ok) {
-          const strategy = await calculationResponse.json();
-          const calculationData = strategy.data;
+        try {
+          const calculationResponse = await Promise.race([
+            fetch('/api/mcp/calculate/optimization', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                loanData,
+                userProfile
+              })
+            }),
+            new Promise((_, reject) => 
+              setTimeout(() => reject(new Error('Request timeout')), 10000)
+            )
+          ]);
           
-          // Format results for the UI
-          const results = {
-            potentialSavings: calculationData.savings?.potentialSavings || 47000,
-            recommendedStrategy: calculationData.recommendation?.recommendedStrategy === 'PSLF' ? 'PSLF with Income-Driven Repayment' : 'Refinancing',
-            payoffTimeline: calculationData.recommendation?.primaryOption?.yearsRemaining ? 
-              `${Math.ceil(calculationData.recommendation.primaryOption.yearsRemaining)} years` : '10 years',
-            monthlyPayment: calculationData.recommendation?.primaryOption?.monthlyPayment || 2000,
-            totalPaid: calculationData.recommendation?.primaryOption?.totalPaid || calculationData.recommendation?.primaryOption?.netCost || 120000,
-            forgiveness: calculationData.recommendation?.primaryOption?.forgivenAmount || 0,
-            confidence: calculationData.recommendation?.confidence || 'high',
-            strategy: calculationData.recommendation?.recommendedStrategy,
-            fullAnalysis: calculationData
-          };
-          
-          setCalculations(results);
-          updateFormData({ calculations: results });
-        } else {
-          throw new Error('Calculation failed');
+          if (calculationResponse.ok) {
+            const strategy = await calculationResponse.json();
+            const calculationData = strategy.data;
+            
+            // Format results for the UI
+            const results = {
+              potentialSavings: calculationData.savings?.potentialSavings || 47000,
+              recommendedStrategy: calculationData.recommendation?.recommendedStrategy === 'PSLF' ? 'PSLF with Income-Driven Repayment' : 'Refinancing',
+              payoffTimeline: calculationData.recommendation?.primaryOption?.yearsRemaining ? 
+                `${Math.ceil(calculationData.recommendation.primaryOption.yearsRemaining)} years` : '10 years',
+              monthlyPayment: calculationData.recommendation?.primaryOption?.monthlyPayment || 2000,
+              totalPaid: calculationData.recommendation?.primaryOption?.totalPaid || calculationData.recommendation?.primaryOption?.netCost || 120000,
+              forgiveness: calculationData.recommendation?.primaryOption?.forgivenAmount || 0,
+              confidence: calculationData.recommendation?.confidence || 'high',
+              strategy: calculationData.recommendation?.recommendedStrategy,
+              fullAnalysis: calculationData
+            };
+            
+            setCalculations(results);
+            updateFormData({ calculations: results });
+          } else {
+            throw new Error('Calculation API returned error');
+          }
+        } catch (calculationError) {
+          console.error('Calculation API call failed:', calculationError);
+          throw new Error('Calculation service unavailable');
         }
         
       } catch (error) {

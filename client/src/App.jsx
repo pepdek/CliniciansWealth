@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, BookOpen, Calculator, TrendingUp, Users, Shield, CheckCircle, Star, ArrowRight, FileText, Award, Clock, DollarSign } from 'lucide-react'
+import { ChevronDown, ChevronRight, BookOpen, Calculator, TrendingUp, Users, Shield, CheckCircle, Star, ArrowRight, FileText, Award, Clock, DollarSign, Download, Twitter, Monitor } from 'lucide-react'
 import LoanOptimizer from './components/LoanOptimizer'
 
 function App() {
@@ -14,26 +14,42 @@ function App() {
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-display font-bold text-navy-800 mb-6">
-            Stop Guessing. <br />
-            <span className="bg-gradient-to-r from-teal-600 to-coral-500 bg-clip-text text-transparent">
-              Start Saving.
-            </span>
-          </h1>
+          <div className="mb-4">
+            <div className="text-sm font-semibold text-teal-600 mb-2">CLINICIANS WEALTH</div>
+            <h1 className="text-5xl md:text-6xl font-display font-bold text-navy-800 mb-4">
+              Stop Guessing. <br />
+              <span className="bg-gradient-to-r from-teal-600 to-coral-500 bg-clip-text text-transparent">
+                Start Saving.
+              </span>
+            </h1>
+            <div className="text-lg font-medium text-coral-600 mb-6">
+              .dot phrases for your wealth
+            </div>
+          </div>
           <p className="text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
-            The only comprehensive loan analysis tool built specifically for physicians.
+            The comprehensive loan analysis tool built specifically for physicians.
           </p>
           <p className="text-lg text-gray-500 mb-8">
             We analyze <strong>all 20+ repayment options</strong> - not just the 4 the government shows you.
           </p>
 
-          {/* CTA Button */}
-          <button
-            onClick={() => setShowDemo(true)}
-            className="bg-coral-500 hover:bg-coral-600 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl mb-8"
-          >
-            Optimize My Loans →
-          </button>
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <button
+              onClick={() => setShowDemo(true)}
+              className="bg-coral-500 hover:bg-coral-600 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              Optimize My Loans →
+            </button>
+            
+            <button
+              onClick={() => window.open('/sample-report.pdf', '_blank')}
+              className="bg-white hover:bg-gray-50 text-navy-800 font-semibold py-4 px-6 rounded-2xl text-lg transition-all border-2 border-navy-200 hover:border-navy-300 inline-flex items-center space-x-2"
+            >
+              <Download className="w-5 h-5" />
+              <span>View Sample Report</span>
+            </button>
+          </div>
 
           {/* Process Preview */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
@@ -68,11 +84,11 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-sage-600 mb-2">$47K</div>
-                <div className="text-sm text-gray-600">Average savings per physician</div>
+                <div className="text-sm text-gray-600">Average potential savings</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-teal-600 mb-2">2,847+</div>
-                <div className="text-sm text-gray-600">Physicians helped</div>
+                <div className="text-3xl font-bold text-teal-600 mb-2">20+</div>
+                <div className="text-sm text-gray-600">Loan strategies analyzed</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-coral-600 mb-2">16+</div>
@@ -190,13 +206,23 @@ function App() {
                     tax implications, and year-by-year payment projections.
                   </p>
                   
-                  <button
-                    onClick={() => setShowDemo(true)}
-                    className="bg-coral-500 hover:bg-coral-600 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all transform hover:scale-105 inline-flex items-center space-x-2"
-                  >
-                    <span>Get Your Custom Analysis</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button
+                      onClick={() => setShowDemo(true)}
+                      className="bg-coral-500 hover:bg-coral-600 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all transform hover:scale-105 inline-flex items-center space-x-2"
+                    >
+                      <span>Get Your Custom Analysis</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="text-center">
+                      <p className="text-navy-300 text-sm mb-2">Plus: Ongoing Rate Monitoring</p>
+                      <div className="inline-flex items-center space-x-2 bg-navy-700/50 text-navy-200 px-4 py-2 rounded-xl text-sm">
+                        <Monitor className="w-4 h-4" />
+                        <span>$5/month after 6 months</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -404,7 +430,7 @@ function App() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                 <div>
                   <div className="text-4xl font-display font-bold text-coral-400 mb-2">$47K</div>
-                  <div className="text-navy-300">Average savings identified</div>
+                  <div className="text-navy-300">Potential savings identified</div>
                 </div>
                 <div>
                   <div className="text-4xl font-display font-bold text-teal-400 mb-2">20+</div>
@@ -412,7 +438,7 @@ function App() {
                 </div>
                 <div>
                   <div className="text-4xl font-display font-bold text-sage-400 mb-2">1000x</div>
-                  <div className="text-navy-300">Minimum ROI on $47 investment</div>
+                  <div className="text-navy-300">Potential ROI on $47 investment</div>
                 </div>
               </div>
               
@@ -427,6 +453,70 @@ function App() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-navy-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {/* Brand */}
+              <div className="md:col-span-2">
+                <div className="mb-4">
+                  <div className="text-2xl font-display font-bold text-white mb-1">Clinicians Wealth</div>
+                  <div className="text-coral-400 font-medium">.dot phrases for your wealth</div>
+                </div>
+                <p className="text-navy-300 mb-4 max-w-md">
+                  Comprehensive loan analysis and wealth-building tools designed specifically 
+                  for physicians. Your trusted partner for financial clarity.
+                </p>
+                <div className="flex items-center space-x-4">
+                  <a 
+                    href="https://x.com/pepdekker" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-navy-400 hover:text-white transition-colors"
+                  >
+                    <Twitter className="w-5 h-5" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Products */}
+              <div>
+                <h3 className="font-display font-bold text-white mb-4">Products</h3>
+                <ul className="space-y-2 text-navy-300">
+                  <li><button onClick={() => setShowDemo(true)} className="hover:text-white transition-colors">Loan Optimizer</button></li>
+                  <li className="text-navy-500">Rate Monitoring (Coming Soon)</li>
+                  <li className="text-navy-500">Wealth Dashboard (Coming Soon)</li>
+                  <li className="text-navy-500">Community Platform (Coming Soon)</li>
+                </ul>
+              </div>
+
+              {/* Resources */}
+              <div>
+                <h3 className="font-display font-bold text-white mb-4">Resources</h3>
+                <ul className="space-y-2 text-navy-300">
+                  <li><a href="/sample-report.pdf" target="_blank" className="hover:text-white transition-colors">Sample Report</a></li>
+                  <li className="text-navy-500">Physician Loan Guide (Coming Soon)</li>
+                  <li className="text-navy-500">PSLF Calculator (Coming Soon)</li>
+                  <li className="text-navy-500">Refinancing Guide (Coming Soon)</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="border-t border-navy-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+              <div className="text-navy-400 text-sm mb-4 md:mb-0">
+                © 2024 Clinicians Wealth. Built by physicians, for physicians.
+              </div>
+              <div className="flex space-x-6 text-navy-400 text-sm">
+                <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
+                <a href="/terms" className="hover:text-white transition-colors">Terms</a>
+                <a href="/contact" className="hover:text-white transition-colors">Contact</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

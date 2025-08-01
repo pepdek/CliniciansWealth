@@ -202,7 +202,21 @@ class StripeService {
           'Specialty salary projections',
           'Tax implications breakdown',
           'Follow-up email sequence',
+          '6 months of rate monitoring included',
           '100% money-back guarantee'
+        ]
+      },
+      monitoring: {
+        price: 5,
+        currency: 'usd',
+        name: 'Ongoing Rate Monitoring',
+        interval: 'month',
+        features: [
+          'Federal rate change alerts',
+          'Refinancing opportunity notifications',
+          'Personalized timing recommendations',
+          'Market analysis updates',
+          'Strategy adjustment alerts'
         ]
       }
     };
