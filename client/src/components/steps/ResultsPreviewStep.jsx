@@ -7,7 +7,12 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
   const [isCalculating, setIsCalculating] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    let timeoutId = null;
+
     const calculateResults = async () => {
+      if (!isMounted) return;
+      
       setIsCalculating(true);
       
       try {
@@ -18,6 +23,9 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
           console.log('Analyzing uploaded documents...');
           
           try {
+            const controller = new AbortController();
+            timeoutId = setTimeout(() => controller.abort(), 8000);
+
             const analysisResponse = await fetch('/api/mcp/analyze/documents', {
               method: 'POST',
               headers: {
@@ -34,22 +42,30 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
                   careerStage: formData.careerStage,
                   graduationYear: formData.graduationYear
                 }
-              })
+              }),
+              signal: controller.signal
             });
+            
+            clearTimeout(timeoutId);
             
             if (analysisResponse.ok) {
               const analysis = await analysisResponse.json();
               loanData = analysis.data;
             } else {
-              console.error('Document analysis failed, using manual data');
+              console.log('Document analysis failed, using manual data');
             }
           } catch (fetchError) {
-            console.error('Document analysis API call failed:', fetchError);
+            if (fetchError.name === 'AbortError') {
+              console.log('Document analysis timed out, using manual data');
+            } else {
+              console.error('Document analysis API call failed:', fetchError);
+            }
+            clearTimeout(timeoutId);
           }
         }
         
         // Step 2: Use manual data if no documents or analysis failed
-        if (!loanData) {
+        if (!loanData && isMounted) {
           loanData = {
             federalLoans: [{
               balance: formData.loanAmount || 250000,
@@ -71,6 +87,8 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
         }
         
         // Step 3: Calculate optimization strategy
+        if (!isMounted) return;
+        
         const userProfile = {
           specialty: formData.specialty,
           careerStage: formData.careerStage,
@@ -80,21 +98,24 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
         };
         
         try {
-          const calculationResponse = await Promise.race([
-            fetch('/api/mcp/calculate/optimization', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                loanData,
-                userProfile
-              })
+          const controller = new AbortController();
+          timeoutId = setTimeout(() => controller.abort(), 8000);
+
+          const calculationResponse = await fetch('/api/mcp/calculate/optimization', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              loanData,
+              userProfile
             }),
-            new Promise((_, reject) => 
-              setTimeout(() => reject(new Error('Request timeout')), 10000)
-            )
-          ]);
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!isMounted) return;
           
           if (calculationResponse.ok) {
             const strategy = await calculationResponse.json();
@@ -114,18 +135,27 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
               fullAnalysis: calculationData
             };
             
-            setCalculations(results);
-            updateFormData({ calculations: results });
+            if (isMounted) {
+              setCalculations(results);
+              updateFormData({ calculations: results });
+            }
           } else {
-            throw new Error('Calculation API returned error');
+            throw new Error(`API returned ${calculationResponse.status}`);
           }
         } catch (calculationError) {
-          console.error('Calculation API call failed:', calculationError);
-          throw new Error('Calculation service unavailable');
+          if (calculationError.name === 'AbortError') {
+            console.log('Calculation request timed out, using fallback');
+          } else {
+            console.error('Calculation API call failed:', calculationError);
+          }
+          clearTimeout(timeoutId);
+          throw calculationError;
         }
         
       } catch (error) {
-        console.error('Calculation error:', error);
+        if (!isMounted) return;
+        
+        console.log('Using fallback calculations due to:', error.message);
         
         // Fallback to mock calculations if API fails
         const mockResults = {
@@ -139,15 +169,30 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
           isEstimate: true
         };
         
-        setCalculations(mockResults);
-        updateFormData({ calculations: mockResults });
+        if (isMounted) {
+          setCalculations(mockResults);
+          updateFormData({ calculations: mockResults });
+        }
+      } finally {
+        if (isMounted) {
+          setIsCalculating(false);
+        }
       }
-      
-      setIsCalculating(false);
     };
 
-    calculateResults();
-  }, [formData, updateFormData]);
+    // Add a small delay to prevent rapid re-calculations
+    const delayedCalculation = setTimeout(() => {
+      calculateResults();
+    }, 100);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(delayedCalculation);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [formData.specialty, formData.careerStage, formData.careerGoals, formData.loanAmount, formData.loanMethod]);
 
   const calculateSavings = (data) => {
     const baseLoan = data.loanAmount || 250000;

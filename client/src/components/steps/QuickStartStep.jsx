@@ -65,9 +65,14 @@ const QuickStartStep = ({ nextStep, updateFormData }) => {
         <h2 className="text-3xl font-display font-bold text-navy-800 mb-4">
           What's your situation?
         </h2>
-        <p className="text-lg text-gray-600 mb-8">
+        <p className="text-lg text-gray-600 mb-4">
           Help us understand where you are in your medical career
         </p>
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-8 max-w-2xl mx-auto">
+          <p className="text-sm text-amber-800 font-medium">
+            ⚠️ <strong>Important:</strong> This tool is designed exclusively for clinicians under 40. Our strategies are specifically tailored for those with student loan debt early in their careers.
+          </p>
+        </div>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">

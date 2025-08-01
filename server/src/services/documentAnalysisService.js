@@ -52,7 +52,7 @@ class DocumentAnalysisService {
     const prompt = this.buildAnalysisPrompt(userContext);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4-vision-preview",
+      model: "gpt-4o", // Latest vision model
       messages: [
         {
           role: "user",
@@ -64,13 +64,14 @@ class DocumentAnalysisService {
             {
               type: "image_url",
               image_url: {
-                url: isImage ? `data:${file.type};base64,${base64Content}` : `data:application/pdf;base64,${base64Content}`
+                url: isImage ? `data:${file.type};base64,${base64Content}` : `data:application/pdf;base64,${base64Content}`,
+                detail: "high" // High detail for better document analysis
               }
             }
           ]
         }
       ],
-      max_tokens: 1500,
+      max_tokens: 2000,
       temperature: 0.1
     });
 
@@ -327,8 +328,19 @@ Return ONLY valid JSON in this exact format:
   }
 
   async convertToBase64(file) {
-    // In a real implementation, this would convert the file to base64
-    // For now, we'll simulate this
+    if (file.buffer) {
+      // If file has buffer (from multer), convert directly
+      return file.buffer.toString('base64');
+    }
+    
+    if (file.path) {
+      // If file has path, read from filesystem
+      const fs = await import('fs/promises');
+      const fileBuffer = await fs.readFile(file.path);
+      return fileBuffer.toString('base64');
+    }
+    
+    // Fallback for mock data
     return Buffer.from('mock-file-content').toString('base64');
   }
 

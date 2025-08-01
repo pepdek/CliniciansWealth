@@ -74,6 +74,15 @@ const SpecialtyStep = ({ nextStep, prevStep, updateFormData }) => {
     } else {
       setShowCustomInput(false);
       setValue('customSpecialty', '');
+      // Auto-advance to next step after brief delay for non-custom selections
+      setTimeout(() => {
+        const specialty = specialtyId;
+        updateFormData({ 
+          specialtyCategory: specialtyId,
+          specialty: specialty 
+        });
+        nextStep();
+      }, 500);
     }
   };
 

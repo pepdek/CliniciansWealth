@@ -146,7 +146,7 @@ const PaymentStep = ({ prevStep, formData }) => {
   const handlePaymentComplete = async (paymentIntent) => {
     setPaymentComplete(true);
     
-    // Confirm payment on backend (this triggers report generation)
+    // Confirm payment on backend
     try {
       const response = await fetch('/api/mcp/payment/confirm', {
         method: 'POST',
@@ -160,7 +160,54 @@ const PaymentStep = ({ prevStep, formData }) => {
 
       const data = await response.json();
       if (data.success) {
-        console.log('Payment confirmed and report generation started');
+        console.log('Payment confirmed');
+        
+        // Generate and download the personalized report
+        try {
+          const reportResponse = await fetch('/api/mcp/generate/personalized-report', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              analysisData: {
+                loanSummary: {
+                  totalFederalBalance: formData.loanAmount || 250000,
+                  totalPrivateBalance: 0,
+                  currentPaymentPlan: 'Standard',
+                  pslfPaymentsMade: 0
+                }
+              },
+              calculationResults: formData.calculations,
+              userProfile: {
+                specialty: formData.specialty,
+                careerStage: formData.careerStage,
+                careerGoals: formData.careerGoals,
+                state: formData.state
+              }
+            })
+          });
+
+          if (reportResponse.ok) {
+            // Download the PDF directly
+            const blob = await reportResponse.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `loan-strategy-${formData.specialty}-${Date.now()}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            console.log('Personalized PDF report downloaded successfully');
+          } else {
+            console.error('Failed to generate personalized report');
+          }
+        } catch (reportError) {
+          console.error('Report generation failed:', reportError);
+          // Don't fail the payment - just log the error
+        }
       } else {
         console.error('Payment confirmation failed:', data.error);
       }
@@ -198,38 +245,38 @@ const PaymentStep = ({ prevStep, formData }) => {
             🎉 You're all set!
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Your comprehensive loan optimization strategy is being generated. 
-            You'll receive your detailed PDF report via email within the next few minutes.
+            Your personalized loan optimization strategy has been generated and downloaded! 
+            Check your Downloads folder for your comprehensive 4-page PDF report.
           </p>
 
           <div className="bg-gradient-to-br from-teal-50 to-coral-50 rounded-2xl p-8 max-w-2xl mx-auto">
             <h3 className="text-xl font-display font-bold text-navy-800 mb-4">
-              What's Coming Your Way:
+              Your 4-Page Premium Report Includes:
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-sage-600 mt-0.5" />
-                <span className="text-sm text-gray-700">25+ page detailed report</span>
+                <span className="text-sm text-gray-700">Executive Summary & Key Metrics</span>
               </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-sage-600 mt-0.5" />
-                <span className="text-sm text-gray-700">Month-by-month payment schedule</span>
+                <span className="text-sm text-gray-700">Detailed Strategy Analysis</span>
               </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-sage-600 mt-0.5" />
-                <span className="text-sm text-gray-700">Step-by-step implementation guide</span>
+                <span className="text-sm text-gray-700">90-Day Implementation Roadmap</span>
               </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-sage-600 mt-0.5" />
-                <span className="text-sm text-gray-700">Specialty salary projections</span>
+                <span className="text-sm text-gray-700">Long-Term Financial Planning</span>
               </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-sage-600 mt-0.5" />
-                <span className="text-sm text-gray-700">Tax implications breakdown</span>
+                <span className="text-sm text-gray-700">Specialty-Specific Projections</span>
               </div>
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-sage-600 mt-0.5" />
-                <span className="text-sm text-gray-700">Follow-up email sequence</span>
+                <span className="text-sm text-gray-700">Tax & Wealth Building Strategies</span>
               </div>
             </div>
           </div>

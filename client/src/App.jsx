@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, BookOpen, Calculator, TrendingUp, Users, Shield, CheckCircle, Star, ArrowRight, FileText, Award, Clock, DollarSign, Download, Twitter, Monitor, Menu, X } from 'lucide-react'
 import LoanOptimizer from './components/LoanOptimizer'
+import Resources from './components/Resources'
 
 function App() {
   const [showDemo, setShowDemo] = useState(false)
+  const [showResources, setShowResources] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   if (showDemo) {
     return <LoanOptimizer />
+  }
+
+  if (showResources) {
+    return <Resources onBackToHome={() => setShowResources(false)} />
   }
 
   return (
@@ -30,7 +36,7 @@ function App() {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <a href="#how-it-works" className="text-navy-200 hover:text-white transition-colors">How It Works</a>
-              <a href="#resources" className="text-navy-200 hover:text-white transition-colors">Resources</a>
+              <button onClick={() => setShowResources(true)} className="text-navy-200 hover:text-white transition-colors">Resources</button>
               <button
                 onClick={() => setShowDemo(true)}
                 className="bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
@@ -53,7 +59,7 @@ function App() {
             <div className="md:hidden border-t border-navy-800 py-4">
               <div className="flex flex-col space-y-4">
                 <a href="#how-it-works" className="text-navy-200 hover:text-white transition-colors">How It Works</a>
-                <a href="#resources" className="text-navy-200 hover:text-white transition-colors">Resources</a>
+                <button onClick={() => setShowResources(true)} className="text-navy-200 hover:text-white transition-colors text-left">Resources</button>
                 <button
                   onClick={() => setShowDemo(true)}
                   className="bg-coral-500 hover:bg-coral-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-left"
@@ -66,25 +72,22 @@ function App() {
         </div>
       </nav>
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16">
+      <section className="container mx-auto px-4 py-16" itemScope itemType="https://schema.org/Service">
         <div className="max-w-4xl mx-auto text-center">
           <div className="mb-4">
-            <div className="text-sm font-semibold text-teal-600 mb-2">CLINICIANS WEALTH</div>
             <h1 className="text-5xl md:text-6xl font-display font-bold text-navy-800 mb-4">
-              Stop Guessing. <br />
+              The Loan Strategy Tool Built <br />
               <span className="bg-gradient-to-r from-teal-600 to-coral-500 bg-clip-text text-transparent">
-                Start Saving.
+                Specifically for Clinicians
               </span>
             </h1>
-            <div className="text-lg font-medium text-coral-600 mb-6">
-              .dot phrases for your wealth
-            </div>
           </div>
           <p className="text-xl text-gray-600 mb-4 max-w-2xl mx-auto">
-            The comprehensive loan analysis tool built specifically for <strong>clinicians under 40</strong>.
+            Analyze all your federal and private loan options in one place. 
+            SAVE plan, PSLF, refinancing, and physician-specific programs.
           </p>
-          <p className="text-lg text-gray-500 mb-8">
-            We analyze <strong>all 20+ repayment options</strong> - not just the 4 the government shows you.
+          <p className="text-lg text-gray-500 mb-2">
+            Get your personalized strategy in 5 minutes.
           </p>
 
           {/* CTA Buttons */}
@@ -93,16 +96,9 @@ function App() {
               onClick={() => setShowDemo(true)}
               className="bg-coral-500 hover:bg-coral-600 text-white font-bold py-4 px-8 rounded-2xl text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
-              Optimize My Loans →
+              Analyze My Options →
             </button>
             
-            <button
-              onClick={() => window.open('/sample-report.pdf', '_blank')}
-              className="bg-white hover:bg-gray-50 text-navy-800 font-semibold py-4 px-6 rounded-2xl text-lg transition-all border-2 border-navy-200 hover:border-navy-300 inline-flex items-center space-x-2"
-            >
-              <Download className="w-5 h-5" />
-              <span>View Sample Report</span>
-            </button>
           </div>
 
           {/* Process Preview */}
@@ -158,7 +154,7 @@ function App() {
             </p>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Case Study Section */}
       <div className="bg-white py-16">
@@ -285,7 +281,7 @@ function App() {
       </div>
 
       {/* How It Works Section */}
-      <div id="how-it-works" className="bg-gradient-to-br from-teal-50 to-coral-50 py-20">
+      <section id="how-it-works" className="bg-gradient-to-br from-teal-50 to-coral-50 py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
@@ -293,7 +289,7 @@ function App() {
                 How Our Analysis Works
               </h2>
               <p className="text-xl text-gray-600 mb-4">
-                Simple process, comprehensive results - designed for busy clinicians under 40
+                Simple process, comprehensive results - exclusively for clinicians under 40 with student loans
               </p>
               <p className="text-lg text-gray-500">
                 From upload to implementation in under 10 minutes
@@ -479,9 +475,16 @@ function App() {
                 </p>
               </div>
             </div>
+            
+            {/* Age Requirement Notice */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-6 py-4 mt-16 max-w-3xl mx-auto">
+              <p className="text-amber-800 font-medium text-center">
+                ⚠️ <strong>Important:</strong> This tool is designed specifically for clinicians under 40. If you're over 40, our strategies may not apply to your situation as they focus on early-career student debt optimization.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Comprehensive Options Section */}
       <div className="bg-gradient-to-br from-teal-50 to-coral-50 py-16">
@@ -566,7 +569,7 @@ function App() {
                   Government Calculator vs. Complete Physician Analysis
                 </h3>
                 <p className="text-gray-600">
-                  See why physicians choose our comprehensive approach
+                  See why clinicians under 40 choose our targeted approach
                 </p>
               </div>
 
@@ -650,10 +653,10 @@ function App() {
                 <div className="w-16 h-16 bg-coral-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Users className="w-8 h-8 text-coral-600" />
                 </div>
-                <h3 className="text-2xl font-display font-bold text-navy-800 mb-4">Built for Clinicians</h3>
+                <h3 className="text-2xl font-display font-bold text-navy-800 mb-4">Built for Clinicians Under 40</h3>
                 <p className="text-gray-600">
-                  Created by physicians who understand your unique career path, 
-                  income timeline, and the challenges of medical training debt.
+                  Created by those who understand the unique challenges clinicians under 40 face: 
+                  massive student debt, lower residency income, and complex federal loan programs.
                 </p>
               </div>
 
@@ -719,8 +722,8 @@ function App() {
                   <div className="text-coral-400 font-medium">.dot phrases for your wealth</div>
                 </div>
                 <p className="text-navy-300 mb-4 max-w-md">
-                  Comprehensive loan analysis and wealth-building tools designed specifically 
-                  for physicians. Your trusted partner for financial clarity.
+                  Comprehensive loan optimization tools designed exclusively 
+                  for clinicians under 40. Your trusted partner for eliminating student debt.
                 </p>
                 <div className="flex items-center space-x-4">
                   <a 

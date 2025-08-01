@@ -5,6 +5,7 @@ import emailService from '../services/emailService.js';
 import documentAnalysisService from '../services/documentAnalysisService.js';
 import calculationService from '../services/calculationService.js';
 import stripeService from '../services/stripeService.js';
+import pdfGenerationService from '../services/pdfGenerationService.js';
 
 const router = express.Router();
 
@@ -544,6 +545,63 @@ router.get('/test/stripe', async (req, res) => {
     res.json({
       success: true,
       service: 'Stripe',
+      status: testResult
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Generate personalized PDF report with OpenAI analysis
+router.post('/generate/personalized-report', async (req, res) => {
+  try {
+    const { analysisData, calculationResults, userProfile } = req.body;
+
+    if (!calculationResults || !userProfile) {
+      return res.status(400).json({
+        success: false,
+        error: 'calculationResults and userProfile are required'
+      });
+    }
+
+    const result = await pdfGenerationService.generatePersonalizedReport(
+      analysisData || {},
+      calculationResults,
+      userProfile
+    );
+
+    if (result.success) {
+      // Set appropriate headers for PDF download
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+      res.setHeader('Content-Length', result.pdf.length);
+      
+      res.send(result.pdf);
+    } else {
+      res.status(500).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Test PDF generation service
+router.get('/test/pdf-generation', async (req, res) => {
+  try {
+    const testResult = await pdfGenerationService.testConnection();
+    
+    res.json({
+      success: true,
+      service: 'PDF Generation',
       status: testResult
     });
   } catch (error) {
