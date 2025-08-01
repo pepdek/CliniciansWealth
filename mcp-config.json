@@ -1,0 +1,63 @@
+{
+  "mcps": {
+    "web-search": {
+      "enabled": true,
+      "provider": "brave",
+      "description": "Web search capabilities using Brave Search API for real-time salary data and refinancing rates",
+      "rateLimit": 100,
+      "maxResults": 10,
+      "fallback": "puppeteer-scraping"
+    },
+    "pdf-generation": {
+      "enabled": true,
+      "description": "Professional PDF report generation using Puppeteer and jsPDF",
+      "templatePath": "./templates/",
+      "outputPath": "./generated/",
+      "formats": ["A4", "Letter"],
+      "fallback": "jspdf-simple"
+    },
+    "email": {
+      "enabled": true,
+      "provider": "nodemailer",
+      "description": "Email automation system for report delivery and follow-up sequences",
+      "from_email": "reports@clinicianloanoptimizer.com",
+      "fallback": "manual-notification"
+    },
+    "database": {
+      "enabled": true,
+      "type": "postgresql",
+      "description": "User data persistence and analytics using PostgreSQL with Prisma ORM",
+      "connection_string": "env:DATABASE_URL",
+      "fallback": "json-file-storage"
+    }
+  },
+  "fallback_strategies": {
+    "web-search": {
+      "method": "puppeteer",
+      "description": "Use Puppeteer to scrape salary data from reliable sources",
+      "sources": [
+        "https://www.mgma.com/",
+        "https://www.medscape.com/",
+        "https://www.glassdoor.com/"
+      ]
+    },
+    "pdf-generation": {
+      "method": "jspdf",
+      "description": "Use jsPDF for basic PDF generation if Puppeteer fails"
+    },
+    "email": {
+      "method": "console-log",
+      "description": "Log email content to console if SMTP is not configured"
+    },
+    "database": {
+      "method": "filesystem",
+      "description": "Store data in JSON files if database is not available"
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "log_level": "info",
+    "performance_tracking": true,
+    "error_reporting": true
+  }
+}
