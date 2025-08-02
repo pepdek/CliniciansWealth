@@ -257,10 +257,14 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
             </motion.div>
           </div>
           <h2 className="text-2xl font-display font-bold text-navy-800 mb-4">
-            Crunching your numbers...
+            {formData.loanMethod === 'upload' && formData.loanDocuments?.length > 0 
+              ? 'Reading your loan documents...' 
+              : 'Crunching your numbers...'}
           </h2>
           <p className="text-gray-600 mb-8">
-            Analyzing PSLF vs refinancing strategies for your situation
+            {formData.loanMethod === 'upload' && formData.loanDocuments?.length > 0 
+              ? `Analyzing ${formData.loanDocuments.length} document(s) to find your optimal loan strategy`
+              : 'Analyzing PSLF vs refinancing strategies for your situation'}
           </p>
           <div className="max-w-md mx-auto bg-gray-200 rounded-full h-2">
             <motion.div
@@ -291,8 +295,16 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
           🎉 Great news! We found ways to save you money
         </h2>
         <p className="text-lg text-gray-600">
-          Here's what we discovered about your loan strategy
+          {formData.loanMethod === 'upload' && formData.loanDocuments?.length > 0 
+            ? `Based on analysis of your ${formData.loanDocuments.length} uploaded document(s):`
+            : 'Here\'s what we discovered about your loan strategy:'}
         </p>
+        {formData.loanMethod === 'upload' && formData.loanDocuments?.length > 0 && (
+          <div className="mt-3 inline-flex items-center space-x-2 bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-sm">
+            <FileText className="w-4 h-4" />
+            <span>Document analysis complete</span>
+          </div>
+        )}
       </motion.div>
 
       {/* Results Cards */}
@@ -341,6 +353,42 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
         </motion.div>
       </div>
 
+      {/* Above-the-Fold CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.45 }}
+        className="bg-gradient-to-br from-navy-800 to-navy-900 rounded-2xl p-6 text-center text-white mb-8"
+      >
+        <h3 className="text-xl font-display font-bold mb-3">
+          Ready to save {formatCurrency(calculations.potentialSavings)}?
+        </h3>
+        
+        <div className="flex items-center justify-center space-x-4 mb-4">
+          <div className="text-center">
+            <div className="text-2xl font-display font-bold text-gold-400">$47</div>
+            <div className="text-xs text-navy-300">Complete Strategy</div>
+          </div>
+          <div className="text-navy-400">→</div>
+          <div className="text-center">
+            <div className="text-2xl font-display font-bold text-sage-400">{formatCurrency(calculations.potentialSavings)}</div>
+            <div className="text-xs text-navy-300">Potential Savings</div>
+          </div>
+        </div>
+
+        <button
+          onClick={nextStep}
+          className="bg-coral-500 hover:bg-coral-600 text-white font-bold py-3 px-6 rounded-xl transition-all transform hover:scale-105 flex items-center space-x-2 mx-auto"
+        >
+          <span>Get My Complete Strategy</span>
+          <ArrowRight className="w-5 h-5" />
+        </button>
+        
+        <div className="mt-3 text-xs text-navy-300">
+          {Math.round(calculations.potentialSavings / 47)}x return on investment • Money-back guarantee
+        </div>
+      </motion.div>
+
       {/* Strategy Preview */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -378,40 +426,43 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
         </div>
       </motion.div>
 
-      {/* CTA Section */}
+      {/* Detailed What's Included Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="bg-gradient-to-br from-navy-800 to-navy-900 rounded-2xl p-8 text-center text-white"
+        transition={{ delay: 0.8 }}
+        className="bg-gradient-to-br from-teal-50 to-coral-50 rounded-2xl p-8 text-center"
       >
-        <h3 className="text-2xl font-display font-bold mb-4">
-          Want your complete strategy?
+        <h3 className="text-2xl font-display font-bold text-navy-800 mb-4">
+          What's included in your complete strategy:
         </h3>
-        <p className="text-navy-200 mb-6 max-w-2xl mx-auto">
-          Get your detailed implementation plan with step-by-step instructions, 
-          exact forms to fill out, and month-by-month payment schedule.
-        </p>
-
-        <div className="bg-navy-700/50 rounded-xl p-6 mb-6">
-          <div className="text-3xl font-display font-bold text-gold-400 mb-2">
-            $47
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <FileText className="w-6 h-6 text-teal-600" />
+            </div>
+            <h4 className="font-semibold text-navy-800 mb-2">Step-by-Step Plan</h4>
+            <p className="text-sm text-gray-600">Detailed implementation guide with exact forms and deadlines</p>
           </div>
-          <p className="text-navy-200 text-sm">
-            That's a {Math.round(calculations.potentialSavings / 47)}x return on investment
-          </p>
+          <div className="text-center">
+            <div className="w-12 h-12 bg-coral-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <TrendingUp className="w-6 h-6 text-coral-600" />
+            </div>
+            <h4 className="font-semibold text-navy-800 mb-2">Payment Schedule</h4>
+            <p className="text-sm text-gray-600">Month-by-month breakdown of your optimized payments</p>
+          </div>
+          <div className="text-center">
+            <div className="w-12 h-12 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <CheckCircle className="w-6 h-6 text-sage-600" />
+            </div>
+            <h4 className="font-semibold text-navy-800 mb-2">Interactive Report</h4>
+            <p className="text-sm text-gray-600">Compare strategies and export professional PDF</p>
+          </div>
         </div>
 
-        <button
-          onClick={nextStep}
-          className="bg-coral-500 hover:bg-coral-600 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all transform hover:scale-105 flex items-center space-x-2 mx-auto"
-        >
-          <span>Get My Complete Strategy</span>
-          <ArrowRight className="w-5 h-5" />
-        </button>
-
-        <div className="mt-4 text-sm text-navy-300">
-          🔒 100% Money-Back Guarantee: If we don't save you at least $1,000, full refund
+        <div className="bg-white rounded-xl p-4 text-sm text-gray-600 border border-teal-200">
+          🔒 <strong>100% Money-Back Guarantee:</strong> If we don't save you at least $1,000, full refund
         </div>
       </motion.div>
 

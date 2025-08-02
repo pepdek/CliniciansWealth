@@ -1,123 +1,125 @@
 import { motion } from 'framer-motion';
-import { CreditCard, Shield, Download, Mail, CheckCircle, Clock, Star } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { CreditCard, Shield, Download, Mail, CheckCircle, Clock, Star, Bell, TrendingUp, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
 
-// Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_your_publishable_key_here');
+// Simplified checkout component that redirects to Stripe
+const CheckoutForm = ({ formData, onPaymentRedirect, isProcessing, setIsProcessing, includeMonitoring, setIncludeMonitoring }) => {
+  const basePrice = 47;
+  const monitoringPrice = 5;
+  const totalPrice = includeMonitoring ? basePrice + monitoringPrice : basePrice;
 
-// Payment form component that uses Stripe Elements
-const CheckoutForm = ({ formData, onPaymentComplete, onPaymentError, isProcessing, setIsProcessing }) => {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [clientSecret, setClientSecret] = useState('');
-  const [paymentIntent, setPaymentIntent] = useState(null);
-
-  useEffect(() => {
-    // Create payment intent when component mounts
-    const createPaymentIntent = async () => {
-      try {
-        const response = await fetch('/api/mcp/payment/create-intent', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            amount: 47, // $47
-            customerData: {
-              email: formData.email,
-              name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || 'Physician',
-              phone: formData.phone,
-              specialty: formData.specialty,
-              careerStage: formData.careerStage,
-              loanAmount: formData.loanAmount || formData.calculations?.loanAmount,
-              recommendedStrategy: formData.calculations?.recommendedStrategy,
-              potentialSavings: formData.calculations?.potentialSavings
-            },
-            metadata: {
-              source: 'clinician-loan-optimizer',
-              timestamp: new Date().toISOString()
-            }
-          }),
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          setClientSecret(data.paymentIntent.client_secret);
-          setPaymentIntent(data.paymentIntent);
-        } else {
-          console.error('Failed to create payment intent:', data.error);
-          onPaymentError(data.error);
-        }
-      } catch (error) {
-        console.error('Payment intent creation failed:', error);
-        onPaymentError(error.message);
-      }
-    };
-
-    createPaymentIntent();
-  }, [formData, onPaymentError]);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!stripe || !elements || !clientSecret) {
-      return;
-    }
-
+  const handleCheckout = async () => {
     setIsProcessing(true);
-
-    const cardElement = elements.getElement(CardElement);
-
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: cardElement,
-        billing_details: {
-          name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || 'Physician',
-          email: formData.email,
-          phone: formData.phone,
+    
+    try {
+      // Create Stripe checkout session
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      },
-    });
+        body: JSON.stringify({
+          priceId: includeMonitoring ? 'price_strategy_plus_monitoring' : 'price_strategy_only',
+          customerData: {
+            email: formData.email,
+            name: `${formData.firstName || ''} ${formData.lastName || ''}`.trim() || 'Physician',
+            specialty: formData.specialty,
+            careerStage: formData.careerStage,
+            loanAmount: formData.loanAmount,
+            potentialSavings: formData.calculations?.potentialSavings
+          },
+          includeMonitoring,
+          successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl: window.location.href
+        }),
+      });
 
-    setIsProcessing(false);
-
-    if (error) {
-      console.error('Payment failed:', error);
-      onPaymentError(error.message);
-    } else if (paymentIntent.status === 'succeeded') {
-      console.log('Payment succeeded:', paymentIntent);
-      onPaymentComplete(paymentIntent);
+      if (response.ok) {
+        const { url } = await response.json();
+        window.location.href = url;
+      } else {
+        throw new Error('Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      // Fallback: redirect to Stripe payment page
+      const stripeUrl = `https://buy.stripe.com/test_your_payment_link_here?prefilled_email=${encodeURIComponent(formData.email || '')}`;
+      window.open(stripeUrl, '_blank');
+    } finally {
+      setIsProcessing(false);
     }
-  };
-
-  const cardElementOptions = {
-    style: {
-      base: {
-        fontSize: '16px',
-        color: '#1e293b',
-        '::placeholder': {
-          color: '#64748b',
-        },
-      },
-      invalid: {
-        color: '#ef4444',
-      },
-    },
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="bg-white rounded-xl border-2 border-gray-200 p-4">
-        <CardElement options={cardElementOptions} />
+    <div className="space-y-6">
+      {/* Monitoring Upsell */}
+      <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-4">
+        <div className="flex items-start space-x-3">
+          <input
+            type="checkbox"
+            id="monitoring"
+            checked={includeMonitoring}
+            onChange={(e) => setIncludeMonitoring(e.target.checked)}
+            className="mt-1 h-4 w-4 text-amber-600 focus:ring-amber-500 border-amber-300 rounded"
+          />
+          <div className="flex-1">
+            <label htmlFor="monitoring" className="cursor-pointer">
+              <div className="flex items-center space-x-2 mb-2">
+                <Bell className="w-5 h-5 text-amber-600" />
+                <span className="font-semibold text-amber-800">Add Monthly Monitoring - $5/month</span>
+                <span className="bg-amber-200 text-amber-800 text-xs px-2 py-1 rounded-full font-medium">RECOMMENDED</span>
+              </div>
+              <p className="text-sm text-amber-700 mb-3">
+                Get alerts when rates drop for refinancing, federal program changes (forbearance, deferred payments, loan forgiveness updates), and personalized strategy adjustments.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-amber-600">
+                <div className="flex items-center space-x-2">
+                  <TrendingUp className="w-3 h-3" />
+                  <span>Rate drop alerts</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <AlertCircle className="w-3 h-3" />
+                  <span>Federal program updates</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Bell className="w-3 h-3" />
+                  <span>Strategy adjustments</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-3 h-3" />
+                  <span>Monthly newsletters</span>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      {/* Price Summary */}
+      <div className="bg-navy-700/30 rounded-xl p-4 text-white">
+        <div className="flex justify-between items-center mb-2">
+          <span>Strategy Report</span>
+          <span>${basePrice}</span>
+        </div>
+        {includeMonitoring && (
+          <div className="flex justify-between items-center mb-2 text-amber-300">
+            <span>Monthly Monitoring</span>
+            <span>${monitoringPrice}/mo</span>
+          </div>
+        )}
+        <div className="border-t border-navy-600 pt-2 mt-2">
+          <div className="flex justify-between items-center font-bold text-lg">
+            <span>Total Today</span>
+            <span>${totalPrice}</span>
+          </div>
+        </div>
       </div>
       
       <button
-        type="submit"
-        disabled={!stripe || isProcessing || !clientSecret}
+        onClick={handleCheckout}
+        disabled={isProcessing}
         className={`w-full py-4 px-6 rounded-xl text-lg font-bold flex items-center justify-center space-x-2 transition-all transform hover:scale-105 ${
-          !stripe || isProcessing || !clientSecret
+          isProcessing
             ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
             : 'bg-coral-500 hover:bg-coral-600 text-white'
         }`}
@@ -125,100 +127,26 @@ const CheckoutForm = ({ formData, onPaymentComplete, onPaymentError, isProcessin
         {isProcessing ? (
           <>
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-            <span>Processing payment...</span>
+            <span>Redirecting to checkout...</span>
           </>
         ) : (
           <>
             <CreditCard className="w-5 h-5" />
-            <span>Secure Checkout - $47</span>
+            <span>Secure Checkout - ${totalPrice}</span>
           </>
         )}
       </button>
-    </form>
+    </div>
   );
 };
 
 const PaymentStep = ({ prevStep, formData, onShowReport }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentComplete, setPaymentComplete] = useState(false);
-  const [paymentError, setPaymentError] = useState('');
+  const [includeMonitoring, setIncludeMonitoring] = useState(true); // Default to recommended option
 
-  const handlePaymentComplete = async (paymentIntent) => {
-    setPaymentComplete(true);
-    
-    // Confirm payment on backend
-    try {
-      const response = await fetch('/api/mcp/payment/confirm', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          paymentIntentId: paymentIntent.id,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        console.log('Payment confirmed');
-        
-        // Generate and download the personalized report
-        try {
-          const reportResponse = await fetch('/api/mcp/generate/personalized-report', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              analysisData: {
-                loanSummary: {
-                  totalFederalBalance: formData.loanAmount || 250000,
-                  totalPrivateBalance: 0,
-                  currentPaymentPlan: 'Standard',
-                  pslfPaymentsMade: 0
-                }
-              },
-              calculationResults: formData.calculations,
-              userProfile: {
-                specialty: formData.specialty,
-                careerStage: formData.careerStage,
-                careerGoals: formData.careerGoals,
-                state: formData.state
-              }
-            })
-          });
-
-          if (reportResponse.ok) {
-            // Download the PDF directly
-            const blob = await reportResponse.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `loan-strategy-${formData.specialty}-${Date.now()}.pdf`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-            
-            console.log('Personalized PDF report downloaded successfully');
-          } else {
-            console.error('Failed to generate personalized report');
-          }
-        } catch (reportError) {
-          console.error('Report generation failed:', reportError);
-          // Don't fail the payment - just log the error
-        }
-      } else {
-        console.error('Payment confirmation failed:', data.error);
-      }
-    } catch (error) {
-      console.error('Payment confirmation failed:', error);
-    }
-  };
-
-  const handlePaymentError = (error) => {
-    setPaymentError(error);
-    setIsProcessing(false);
+  const handlePaymentRedirect = () => {
+    // Payment will be handled by Stripe Checkout
+    // After successful payment, user will be redirected to success page
   };
 
   const formatCurrency = (amount) => {
@@ -245,13 +173,13 @@ const PaymentStep = ({ prevStep, formData, onShowReport }) => {
             🎉 You're all set!
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Your personalized loan optimization strategy has been generated and downloaded! 
-            Check your Downloads folder for your comprehensive 4-page PDF report.
+            Your personalized loan optimization strategy has been generated! 
+            Access your complete interactive report and export to PDF with one click.
           </p>
 
           <div className="bg-gradient-to-br from-teal-50 to-coral-50 rounded-2xl p-8 max-w-2xl mx-auto">
             <h3 className="text-xl font-display font-bold text-navy-800 mb-4">
-              Your 4-Page Premium Report Includes:
+              Your Complete Strategy Report Includes:
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div className="flex items-start space-x-3">
@@ -332,7 +260,7 @@ const PaymentStep = ({ prevStep, formData, onShowReport }) => {
               {[
                 { icon: Download, text: 'Detailed payment schedule month-by-month' },
                 { icon: CheckCircle, text: 'Step-by-step implementation guide' },
-                { icon: CreditCard, text: 'Professional PDF report (25+ pages)' },
+                { icon: CreditCard, text: 'Personalized strategy report (exportable to PDF)' },
                 { icon: Star, text: 'Specialty salary projections for your career' },
                 { icon: CheckCircle, text: 'Tax implications breakdown' },
                 { icon: Mail, text: 'Exact forms and applications you need' },
@@ -413,18 +341,12 @@ const PaymentStep = ({ prevStep, formData, onShowReport }) => {
             {/* Payment Form */}
             <CheckoutForm
               formData={formData}
-              onPaymentComplete={handlePaymentComplete}
-              onPaymentError={handlePaymentError}
+              onPaymentRedirect={handlePaymentRedirect}
               isProcessing={isProcessing}
               setIsProcessing={setIsProcessing}
+              includeMonitoring={includeMonitoring}
+              setIncludeMonitoring={setIncludeMonitoring}
             />
-
-            {/* Display payment errors */}
-            {paymentError && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-                <strong>Payment Error:</strong> {paymentError}
-              </div>
-            )}
 
             {/* Security & Guarantee */}
             <div className="space-y-3 text-center">
@@ -468,13 +390,4 @@ const PaymentStep = ({ prevStep, formData, onShowReport }) => {
   );
 };
 
-// Main PaymentStep component wrapped with Stripe Elements
-const PaymentStepWithStripe = (props) => {
-  return (
-    <Elements stripe={stripePromise}>
-      <PaymentStep {...props} />
-    </Elements>
-  );
-};
-
-export default PaymentStepWithStripe;
+export default PaymentStep;
