@@ -17,6 +17,88 @@ class StripeService {
     }
   }
 
+  async createCheckoutSession({ priceId, customerData, includeMonitoring, successUrl, cancelUrl }) {
+    if (!this.enabled) {
+      throw new Error('Stripe service not configured');
+    }
+
+    try {
+      // Define line items based on selection
+      const lineItems = [];
+      
+      // Base strategy report
+      lineItems.push({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: 'Complete Loan Optimization Strategy',
+            description: 'Personalized strategy report with step-by-step implementation guide',
+          },
+          unit_amount: 4700, // $47
+        },
+        quantity: 1,
+      });
+
+      // Add monitoring if selected
+      if (includeMonitoring) {
+        lineItems.push({
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Monthly Rate Monitoring',
+              description: 'Alerts for rate changes, federal program updates, and strategy adjustments',
+            },
+            unit_amount: 500, // $5
+            recurring: {
+              interval: 'month',
+            },
+          },
+          quantity: 1,
+        });
+      }
+
+      const session = await this.stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: lineItems,
+        mode: includeMonitoring ? 'subscription' : 'payment',
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        customer_email: customerData.email,
+        metadata: {
+          customer_name: customerData.name,
+          customer_specialty: customerData.specialty,
+          loan_amount: customerData.loanAmount,
+          potential_savings: customerData.potentialSavings,
+          include_monitoring: includeMonitoring.toString(),
+        },
+        billing_address_collection: 'auto',
+        payment_intent_data: includeMonitoring ? undefined : {
+          metadata: {
+            customer_email: customerData.email,
+            customer_name: customerData.name,
+            customer_specialty: customerData.specialty,
+            loan_amount: customerData.loanAmount,
+            potential_savings: customerData.potentialSavings,
+          },
+          receipt_email: customerData.email,
+          description: 'Clinician Loan Optimization Report'
+        },
+      });
+
+      return {
+        success: true,
+        url: session.url,
+        sessionId: session.id
+      };
+    } catch (error) {
+      console.error('Stripe checkout session creation failed:', error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
   async createPaymentIntent(amount, customerData, metadata = {}) {
     if (!this.enabled) {
       throw new Error('Stripe service not configured');
@@ -196,7 +278,7 @@ class StripeService {
         currency: 'usd',
         name: 'Complete Loan Optimization Strategy',
         features: [
-          '25+ page detailed report',
+          'Personalized strategy report (exportable to PDF)',
           'Month-by-month payment schedule',
           'Step-by-step implementation guide', 
           'Specialty salary projections',
@@ -212,11 +294,11 @@ class StripeService {
         name: 'Ongoing Rate Monitoring',
         interval: 'month',
         features: [
-          'Federal rate change alerts',
-          'Refinancing opportunity notifications',
-          'Personalized timing recommendations',
+          'Rate drop alerts for refinancing opportunities',
+          'Federal program updates (forbearance, deferred payments, loan forgiveness)',
+          'Personalized strategy adjustments',
           'Market analysis updates',
-          'Strategy adjustment alerts'
+          'Monthly financial newsletter'
         ]
       }
     };

@@ -3,12 +3,18 @@ import { ChevronDown, ChevronRight, BookOpen, Calculator, TrendingUp, Users, Shi
 import LoanOptimizer from './components/LoanOptimizer'
 import Resources from './components/Resources'
 import Dashboard from './components/Dashboard'
+import SuccessPage from './components/SuccessPage'
 
 function App() {
   const [showDemo, setShowDemo] = useState(false)
   const [showResources, setShowResources] = useState(false)
   const [showDashboard, setShowDashboard] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Check if we're on the success page
+  if (window.location.pathname === '/success') {
+    return <SuccessPage />
+  }
 
   if (showDemo) {
     return <LoanOptimizer />

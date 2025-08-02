@@ -391,6 +391,46 @@ router.get('/test/document-analysis', async (req, res) => {
   }
 });
 
+// Create checkout session for Stripe Checkout
+router.post('/create-checkout-session', async (req, res) => {
+  try {
+    const { priceId, customerData, includeMonitoring, successUrl, cancelUrl } = req.body;
+
+    if (!customerData || !customerData.email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Customer data with email is required'
+      });
+    }
+
+    const result = await stripeService.createCheckoutSession({
+      priceId,
+      customerData,
+      includeMonitoring,
+      successUrl,
+      cancelUrl
+    });
+
+    if (result.success) {
+      res.json({
+        success: true,
+        url: result.url,
+        sessionId: result.sessionId
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Create payment intent
 router.post('/payment/create-intent', async (req, res) => {
   try {
