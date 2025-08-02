@@ -112,7 +112,7 @@ const LoanOptimizer = () => {
       case 7:
         return <PaymentStep {...stepProps} onShowReport={handleShowReport} />;
       default:
-        return <QuickStartStep {...stepProps} />;
+        return <PaymentStep {...stepProps} onShowReport={handleShowReport} />;
     }
   };
 

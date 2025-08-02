@@ -143,6 +143,7 @@ const CheckoutForm = ({ formData, onPaymentRedirect, isProcessing, setIsProcessi
 const PaymentStep = ({ prevStep, formData, onShowReport }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [includeMonitoring, setIncludeMonitoring] = useState(true); // Default to recommended option
+  const [paymentComplete, setPaymentComplete] = useState(false); // Add missing state
 
   const handlePaymentRedirect = () => {
     // Payment will be handled by Stripe Checkout
