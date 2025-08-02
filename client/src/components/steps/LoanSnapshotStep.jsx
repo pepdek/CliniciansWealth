@@ -10,6 +10,9 @@ const LoanSnapshotStep = ({ nextStep, prevStep, updateFormData }) => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [loanAmount, setLoanAmount] = useState(250000);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currentPaymentPlan, setCurrentPaymentPlan] = useState('');
+  const [monthlyPayment, setMonthlyPayment] = useState('');
+  const [hasPrivateLoans, setHasPrivateLoans] = useState('');
 
   const onDrop = useCallback(async (acceptedFiles) => {
     setIsProcessing(true);
@@ -56,10 +59,15 @@ const LoanSnapshotStep = ({ nextStep, prevStep, updateFormData }) => {
   const handleQuickNumbers = () => {
     updateFormData({ 
       loanMethod: 'manual',
-      loanAmount: loanAmount
+      loanAmount: loanAmount,
+      currentPaymentPlan: currentPaymentPlan,
+      monthlyPayment: monthlyPayment,
+      hasPrivateLoans: hasPrivateLoans
     });
     nextStep();
   };
+
+  const canContinue = loanAmount > 0 && currentPaymentPlan && hasPrivateLoans;
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('en-US', {
@@ -256,9 +264,78 @@ const LoanSnapshotStep = ({ nextStep, prevStep, updateFormData }) => {
                 </p>
               </div>
 
+              {/* Additional Questions */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-navy-700 mb-2">
+                    What federal payment plan are you currently on?
+                  </label>
+                  <select
+                    value={currentPaymentPlan}
+                    onChange={(e) => setCurrentPaymentPlan(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  >
+                    <option value="">Select your current plan</option>
+                    <option value="standard">Standard 10-year</option>
+                    <option value="graduated">Graduated</option>
+                    <option value="extended">Extended</option>
+                    <option value="idr">Income-driven (IBR/PAYE/REPAYE/SAVE)</option>
+                    <option value="unsure">Not sure</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-navy-700 mb-2">
+                    About how much do you pay monthly? (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={monthlyPayment}
+                    onChange={(e) => setMonthlyPayment(e.target.value)}
+                    placeholder="e.g., $1,200"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-navy-700 mb-2">
+                    Do you have any private loans?
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setHasPrivateLoans('yes')}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        hasPrivateLoans === 'yes'
+                          ? 'border-teal-500 bg-teal-50 text-teal-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHasPrivateLoans('no')}
+                      className={`px-4 py-2 rounded-lg border transition-colors ${
+                        hasPrivateLoans === 'no'
+                          ? 'border-teal-500 bg-teal-50 text-teal-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      No
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <button
                 onClick={handleQuickNumbers}
-                className="w-full bg-coral-500 hover:bg-coral-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center justify-center space-x-2"
+                disabled={!canContinue}
+                className={`w-full font-semibold py-3 px-6 rounded-xl transition-colors flex items-center justify-center space-x-2 ${
+                  canContinue
+                    ? 'bg-coral-500 hover:bg-coral-600 text-white'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
               >
                 <span>Continue with {formatCurrency(loanAmount)}</span>
                 <ArrowRight className="w-4 h-4" />

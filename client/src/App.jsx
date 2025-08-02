@@ -104,21 +104,6 @@ function App() {
             Get your personalized strategy in 5 minutes.
           </p>
 
-          {/* Shorter Hero CTA Banner */}
-          <div className="bg-gradient-to-r from-teal-600 to-coral-500 rounded-2xl p-6 mb-8 text-white">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-center sm:text-left">
-                <div className="text-2xl font-display font-bold mb-1">Save $47,000+ on Your Loans</div>
-                <div className="text-teal-100">Complete analysis in 5 minutes • $47 investment</div>
-              </div>
-              <button
-                onClick={() => setShowDemo(true)}
-                className="bg-white text-teal-600 font-bold py-3 px-6 rounded-xl hover:bg-gray-50 transition-all transform hover:scale-105 shadow-lg"
-              >
-                Start Analysis →
-              </button>
-            </div>
-          </div>
 
           {/* Main CTA Button */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
@@ -180,7 +165,7 @@ function App() {
           {/* Risk Reversal */}
           <div className="mt-12 text-center">
             <p className="text-gray-600">
-              🔒 100% Money-Back Guarantee • Bank-Level Security • HIPAA Compliant
+              🔒 100% Money-Back Guarantee • Bank-Level Security • Comprehensive 20+ Strategy Analysis
             </p>
           </div>
         </div>

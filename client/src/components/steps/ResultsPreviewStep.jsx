@@ -353,11 +353,36 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
         </motion.div>
       </div>
 
-      {/* Above-the-Fold CTA */}
+      {/* Analysis Results Banner */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.45 }}
+        className="bg-gradient-to-r from-teal-600 to-coral-500 rounded-2xl p-6 text-white mb-8"
+      >
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-center sm:text-left">
+            <div className="text-2xl font-display font-bold mb-2">
+              {formData.loanMethod === 'upload' && formData.loanDocuments?.length > 0 
+                ? `✅ Analyzed ${formData.loanDocuments.length} Document${formData.loanDocuments.length > 1 ? 's' : ''} + 20+ Federal Programs`
+                : '✅ Analyzed Your Profile + 20+ Federal Programs'
+              }
+            </div>
+            <div className="text-teal-100 text-sm">
+              {formData.loanMethod === 'upload' && formData.loanDocuments?.length > 0 
+                ? 'We extracted your loan details and cross-referenced against all available federal plans, refinancing options, and state programs for your specialty.'
+                : 'We analyzed your loan profile against all available federal plans, refinancing options, and state programs specific to your medical specialty.'
+              }
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Above-the-Fold CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
         className="bg-gradient-to-br from-navy-800 to-navy-900 rounded-2xl p-6 text-center text-white mb-8"
       >
         <h3 className="text-xl font-display font-bold mb-3">
@@ -423,6 +448,34 @@ const ResultsPreviewStep = ({ nextStep, prevStep, formData, updateFormData }) =>
               {formData.pslfEligible ? 'After 120 payments' : 'Compared to current rates'}
             </p>
           </div>
+        </div>
+      </motion.div>
+
+      {/* Empathetic Monitoring CTA */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.75 }}
+        className="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 mb-8"
+      >
+        <div className="text-center">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-amber-600" />
+          </div>
+          <h3 className="text-xl font-display font-bold text-amber-800 mb-3">
+            You Don't Have to Navigate This Alone
+          </h3>
+          <p className="text-amber-700 mb-4 max-w-2xl mx-auto">
+            Federal programs change. Rates fluctuate. New opportunities emerge. As your trusted partner, 
+            we'll watch over your loans and alert you to better options so you can focus on what matters most—your patients.
+          </p>
+          <div className="bg-white rounded-xl p-4 mb-4 inline-block">
+            <div className="text-2xl font-display font-bold text-amber-800 mb-1">$5/month</div>
+            <div className="text-sm text-amber-600">Ongoing Rate Monitoring & Federal Program Alerts</div>
+          </div>
+          <p className="text-xs text-amber-600">
+            💡 We're on your side. Get notified when rates drop or when federal programs like forbearance or loan forgiveness change.
+          </p>
         </div>
       </motion.div>
 
