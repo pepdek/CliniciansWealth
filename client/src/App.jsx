@@ -132,7 +132,7 @@ function App() {
           </div>
 
           {/* Process Preview */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-24">
             <div className="bg-white rounded-2xl p-6 shadow-lg">
               <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-teal-600 font-bold text-lg">1</span>
@@ -159,7 +159,7 @@ function App() {
           </div>
 
           {/* Social Proof */}
-          <div className="mt-16 bg-white rounded-2xl p-8 shadow-lg">
+          <div className="mt-20 bg-white rounded-2xl p-8 shadow-lg">
             <h3 className="font-display font-semibold text-navy-800 mb-6">Trusted by Physicians Nationwide</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
@@ -178,7 +178,7 @@ function App() {
           </div>
 
           {/* Risk Reversal */}
-          <div className="mt-8 text-center">
+          <div className="mt-12 text-center">
             <p className="text-gray-600">
               🔒 100% Money-Back Guarantee • Bank-Level Security • HIPAA Compliant
             </p>
@@ -187,7 +187,7 @@ function App() {
       </section>
 
       {/* Case Study Section */}
-      <div className="bg-white py-16">
+      <div className="bg-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
@@ -517,7 +517,7 @@ function App() {
       </section>
 
       {/* Comprehensive Options Section */}
-      <div className="bg-gradient-to-br from-teal-50 to-coral-50 py-16">
+      <div className="bg-gradient-to-br from-teal-50 to-coral-50 py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
@@ -652,7 +652,7 @@ function App() {
       </div>
 
       {/* Trust & Education Section */}
-      <div className="bg-white py-16">
+      <div className="bg-white py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
